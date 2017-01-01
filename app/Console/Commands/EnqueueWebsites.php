@@ -46,6 +46,20 @@ class EnqueueWebsites extends Command
                 dispatch(new SyncWebsite($website));
                 $this->info($website->name.' enqueued.');
             }
+
+            // get the notifications
+            $notificationsQuery = DB::table('notifications')
+                    ->where([
+                        ['notifiable_id', Auth::user()->id],
+                        ['data->context', 'cron']
+                    ]);
+
+            $notifications = $notificationsQuery->get();
+            $notificationsQuery->delete();
+
+            if (!empty($notifications)) {
+                // Send email here
+            }
         }
 
     }

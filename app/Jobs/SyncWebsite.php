@@ -37,7 +37,7 @@ class SyncWebsite implements ShouldQueue
     {
         $extensions = $this->website->extentions ?: [];
 
-        $sync = new \App\Sphinge\Sync($this->website, $extensions);
+        $sync = new \App\Sphinge\Sync($this->website, $extensions, 'cron');
         $sync->fetch();
         $sync->updateWebsite();
         $sync->updateExtensions();

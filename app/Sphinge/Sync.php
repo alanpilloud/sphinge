@@ -3,6 +3,8 @@
 namespace App\Sphinge;
 
 use GuzzleHttp\Client;
+use App\Notifications\SyncAlert;
+use Illuminate\Support\Facades\Auth;
 
 class Sync {
 
@@ -35,13 +37,6 @@ class Sync {
     private $jsonResponse;
 
     /**
-     * Holds all notifications sent by the class
-     *
-     * @var array
-     */
-    public $notifications;
-
-    /**
      * Fields to be fetched and compared
      *
      * @var array
@@ -53,7 +48,14 @@ class Sync {
         'mysql_version',
     ];
 
-    public function __construct(\App\Website $website, array $extensions)
+    /**
+     * Describes the context in which the Sync has been initiated
+     *
+     * @var string  'cron' or 'manual'
+     */
+    private $context;
+
+    public function __construct(\App\Website $website, array $extensions, $context = 'cron')
     {
         $this->website = $website;
         $this->extensions = $extensions;
@@ -67,6 +69,7 @@ class Sync {
                 'key' => $this->website->secret_key
             ]
         ]);
+        $this->context = $context;
     }
 
     /**
@@ -191,14 +194,26 @@ class Sync {
         // Check if there are some deleted extensions
         if (!empty($extensions)) {
             foreach ($extensions as $extension) {
-                $this->notifications[] = ['message' => $extension->name.' ('.$extension->type.') has been deleted', 'status' => 'warning'];
+                $alert = [
+                    'context' => $this->context,
+                    'website_name' => $this->website->name,
+                    'message' => $extension->name.' ('.$extension->type.') has been deleted',
+                    'status' => 'warning'
+                ];
+                Auth::user()->notify(new SyncAlert($alert));
             }
         }
 
         // Check if there are some new extensions
         if (!empty($remoteExtensions)) {
             foreach ($remoteExtensions as $remoteExtension) {
-                $this->notifications[] = ['message' => $remoteExtension->Name.' ('.$remoteExtension->Type.') version '.$remoteExtension->Version.' has been installed', 'status' => 'warning'];
+                $alert = [
+                    'context' => $this->context,
+                    'website_name' => $this->website->name,
+                    'message' => $remoteExtension->Name.' ('.$remoteExtension->Type.') version '.$remoteExtension->Version.' has been installed',
+                    'status' => 'warning'
+                ];
+                Auth::user()->notify(new SyncAlert($alert));
             }
         }
 

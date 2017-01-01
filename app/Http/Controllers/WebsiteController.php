@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Website;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class WebsiteController extends Controller
 {
@@ -108,13 +109,24 @@ class WebsiteController extends Controller
     {
         $website = Website::findOrFail($id);
         $extensions = $website->extentions ?: [];
-        $sync = new \App\Sphinge\Sync($website, $extensions);
+        $sync = new \App\Sphinge\Sync($website, $extensions, 'manual');
         $sync->fetch();
         $sync->updateWebsite();
         $sync->updateExtensions();
 
-        $notifications = $sync->notifications;
+        // get the notifications
+        $notificationsQuery = DB::table('notifications')
+                ->where([
+                    ['notifiable_id', Auth::user()->id],
+                    ['data->context', 'manual']
+                ]);
 
-        return redirect()->action('WebsiteController@show', ['id' => $id])->with('notifications', $notifications);
+        $notifications = $notificationsQuery->get();
+        $notificationsQuery->delete();
+
+        // get notifications from the array to send them to the blade template
+        $notificationsArray = array_map('json_decode', array_pluck($notifications, 'data'));
+
+        return redirect()->action('WebsiteController@show', ['id' => $id])->with('notifications', $notificationsArray);
     }
 }

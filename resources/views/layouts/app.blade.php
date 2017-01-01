@@ -83,10 +83,10 @@
                 <div class="col-md-8 col-md-offset-2">
                     @if (session('notifications'))
                         @foreach (session('notifications') as $notification)
-                            <div class="alert alert-{{ $notification['status'] }}">{{ $notification['message'] }}</div>
+                            <div class="alert alert-{{ $notification->status }}">{{ $notification->message }}</div>
                         @endforeach
                     @endif
-                    
+
                     @yield('content')
                 </div>
             </div>
