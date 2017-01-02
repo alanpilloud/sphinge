@@ -36,6 +36,9 @@ class CreateWebsitesTable extends Migration
      */
     public function down()
     {
+        Schema::table('websites', function(Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::drop('websites');
     }
 }
