@@ -5,6 +5,7 @@ namespace App\Sphinge;
 use GuzzleHttp\Client;
 use App\Notifications\SyncAlert;
 use Illuminate\Support\Facades\Auth;
+use \App\User;
 
 class Sync {
 
@@ -70,6 +71,7 @@ class Sync {
             ]
         ]);
         $this->context = $context;
+        $this->user = Auth::user() ?: User::find($website->user_id);
     }
 
     /**
@@ -83,7 +85,13 @@ class Sync {
             $response = $this->client->request('GET', '/sphinge/report.php');
             $this->jsonResponse = json_decode($response->getBody());
         } catch(\GuzzleHttp\Exception\ClientException $e) {
-            $this->notifications[] = ['message' => 'Can\'t reach remote website.', 'status' => 'danger'];
+            $alert = [
+                'context' => $this->context,
+                'website_name' => $this->website->name,
+                'message' => 'Can\'t reach remote website.',
+                'status' => 'danger'
+            ];
+            $this->user->notify(new SyncAlert($alert));
         }
     }
 
@@ -150,7 +158,13 @@ class Sync {
         foreach ($this->websiteFields as $field) {
             // if the value has changed, notify the user
             if ($this->website->{$field} != $this->jsonResponse->system->{$field}) {
-                $this->notifications[] = ['message' => $field.'\'s version has change from '.$this->website->{$field}.' to '.$this->jsonResponse->system->{$field}, 'status' => 'warning'];
+                $alert = [
+                    'context' => $this->context,
+                    'website_name' => $this->website->name,
+                    'message' => $field.'\'s version has change from '.$this->website->{$field}.' to '.$this->jsonResponse->system->{$field},
+                    'status' => 'warning'
+                ];
+                $this->user->notify(new SyncAlert($alert));
             }
         }
 
@@ -177,7 +191,13 @@ class Sync {
                     if ($extension->name == $remoteExtension->Name) {
                         // If the version has changed, notify the user
                         if ($extension->version != $remoteExtension->Version) {
-                            $this->notifications[] = ['message' => $extension->name.'\'s ('.$extension->type.') version has change from '.$extension->version.' to '.$remoteExtension->Version, 'status' => 'warning'];
+                            $alert = [
+                                'context' => $this->context,
+                                'website_name' => $this->website->name,
+                                'message' => $extension->name.'\'s ('.$extension->type.') version has change from '.$extension->version.' to '.$remoteExtension->Version,
+                                'status' => 'warning'
+                            ];
+                            $this->user->notify(new SyncAlert($alert));
                         }
 
                         // delete this found extension from the array
@@ -200,7 +220,7 @@ class Sync {
                     'message' => $extension->name.' ('.$extension->type.') has been deleted',
                     'status' => 'warning'
                 ];
-                Auth::user()->notify(new SyncAlert($alert));
+                $this->user->notify(new SyncAlert($alert));
             }
         }
 
@@ -213,7 +233,7 @@ class Sync {
                     'message' => $remoteExtension->Name.' ('.$remoteExtension->Type.') version '.$remoteExtension->Version.' has been installed',
                     'status' => 'warning'
                 ];
-                Auth::user()->notify(new SyncAlert($alert));
+                $this->user->notify(new SyncAlert($alert));
             }
         }
 
