@@ -5,6 +5,10 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use \App\Website;
 use \App\Jobs\SyncWebsite;
+use \App\User;
+use \App\Mail\SyncNotifications;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class EnqueueWebsites extends Command
 {
@@ -48,17 +52,23 @@ class EnqueueWebsites extends Command
             }
 
             // get the notifications
-            $notificationsQuery = DB::table('notifications')
-                    ->where([
-                        ['notifiable_id', Auth::user()->id],
-                        ['data->context', 'cron']
-                    ]);
+            $notificationsQuery = DB::table('notifications')->where('data->context', 'cron');
 
             $notifications = $notificationsQuery->get();
             $notificationsQuery->delete();
 
             if (!empty($notifications)) {
-                // Send email here
+                $notificationsByUser = [];
+                // get the notifications sorted by user ids
+                foreach ($notifications as $notification) {
+                    $notificationsByUser[$notification->notifiable_id][] = json_decode($notification->data);
+                }
+
+                foreach ($notificationsByUser as $user_id => $notifications) {
+                    $User = User::find($user_id);
+
+                    Mail::to($User)->send(new SyncNotifications($notifications));
+                }
             }
         }
 
