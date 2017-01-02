@@ -1,3 +1,8 @@
+## Minimal requirements
+
+ - php 7.0
+ - mysql 5.7 (mariadb won't work for the moment)
+
 ### Enable Scheduled Verification
 
 First, make sure the scheduled task is running :
