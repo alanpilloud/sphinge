@@ -15,7 +15,7 @@ class CreateExtensionsTable extends Migration
     {
         Schema::create('extensions', function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            $table->increments('id');
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->string('type');
             $table->string('version');

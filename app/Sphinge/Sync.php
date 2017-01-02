@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use App\Notifications\SyncAlert;
 use Illuminate\Support\Facades\Auth;
 use \App\User;
+use Ramsey\Uuid\Uuid;
 
 class Sync {
 
@@ -136,6 +137,7 @@ class Sync {
 
         foreach ($this->jsonResponse->extensions as $remoteExtension) {
             $extension = new \App\Extension;
+            $extension->id = Uuid::uuid4()->toString();
             $extension->name = $remoteExtension->Name;
             $extension->type = $remoteExtension->Type;
             $extension->version = $remoteExtension->Version;
