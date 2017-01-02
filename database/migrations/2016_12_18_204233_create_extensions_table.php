@@ -32,6 +32,9 @@ class CreateExtensionsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('extensions');
+        Schema::table('extensions', function(Blueprint $table) {
+            $table->dropForeign(['website_id']);
+        });
+        Schema::dropIfExists('extensions');
     }
 }
