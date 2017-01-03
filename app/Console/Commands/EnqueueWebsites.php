@@ -52,7 +52,8 @@ class EnqueueWebsites extends Command
             }
 
             // get the notifications
-            $notificationsQuery = DB::table('notifications')->where('data->context', 'cron');
+            // @todo the LIKE needs to be replaced when mysql 5.7 will be more globally supported
+            $notificationsQuery = DB::table('notifications')->where('data', 'like', '%"context":"cron"%');
 
             $notifications = $notificationsQuery->get();
             $notificationsQuery->delete();

@@ -115,12 +115,13 @@ class WebsiteController extends Controller
         $sync->updateExtensions();
 
         // get the notifications
+        // @todo the LIKE needs to be replaced when mysql 5.7 will be more globally supported
         $notificationsQuery = DB::table('notifications')
                 ->where([
                     ['notifiable_id', Auth::user()->id],
-                    ['data->context', 'manual']
+                    ['data', 'like', '%"context":"manual"%']
                 ]);
-
+                
         $notifications = $notificationsQuery->get();
         $notificationsQuery->delete();
 
