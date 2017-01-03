@@ -26,3 +26,4 @@ Route::get('/websites/{id}/edit', 'WebsiteController@edit');
 Route::post('/websites/{id}/update', 'WebsiteController@update');
 Route::get('/websites/{id}/destroy', 'WebsiteController@destroy');
 Route::get('/websites/{id}/sync', 'WebsiteController@sync');
+Route::get('/websites/{id}/audit', 'WebsiteController@audit');

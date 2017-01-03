@@ -129,4 +129,18 @@ class WebsiteController extends Controller
 
         return redirect()->action('WebsiteController@show', ['id' => $id])->with('notifications', $notificationsArray);
     }
+
+    /**
+     * Performs a security audit
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function audit($id) {
+        $website = Website::findOrFail($id);
+        $audit = new \App\Sphinge\Audit($website);
+        $audit->run();
+        return view('website.audit', ['website' => $website, 'rules' => $audit->rules]);
+    }
 }
