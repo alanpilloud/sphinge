@@ -110,10 +110,6 @@ class WebsiteController extends Controller
         $website = Website::findOrFail($id);
         $extensions = $website->extentions ?: [];
         $sync = new \App\Sphinge\Sync($website, $extensions, 'manual');
-        $sync->fetch();
-        $sync->updateWebsite();
-        $sync->updateExtensions();
-        $sync->updateUsers();
 
         // get the notifications
         // @todo the LIKE needs to be replaced when mysql 5.7 will be more globally supported

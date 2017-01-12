@@ -59,7 +59,21 @@ class Sync {
 
     public function __construct(\App\Website $website, array $extensions, $context = 'cron')
     {
+        $this->user = Auth::user() ?: User::find($website->user_id);
         $this->website = $website;
+        $this->context = $context;
+
+        if (empty($this->website->secret_key)) {
+            $alert = [
+                'context' => $this->context,
+                'website_name' => $this->website->name,
+                'message' => 'Please indicate a secret key',
+                'status' => 'warning'
+            ];
+            $this->user->notify(new SyncAlert($alert));
+            return false;
+        }
+
         $this->extensions = $extensions;
         $this->client = new Client([
             'base_uri' => $website->url,
@@ -71,8 +85,15 @@ class Sync {
                 'key' => $this->website->secret_key
             ]
         ]);
-        $this->context = $context;
-        $this->user = Auth::user() ?: User::find($website->user_id);
+
+
+        /**
+         * Now, run the synchronization
+         */
+        $this->fetch();
+        $this->updateWebsite();
+        $this->updateExtensions();
+        $this->updateUsers();
     }
 
     /**
