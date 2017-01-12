@@ -41,5 +41,6 @@ class SyncWebsite implements ShouldQueue
         $sync->fetch();
         $sync->updateWebsite();
         $sync->updateExtensions();
+        $sync->updateUsers();
     }
 }

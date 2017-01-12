@@ -147,6 +147,36 @@ class Sync {
     }
 
     /**
+     * Update a website's users informations
+     *
+     * @return void
+     */
+    public function updateUsers()
+    {
+        if (empty($this->jsonResponse->users)) {
+            return false;
+        }
+
+        // compare new and old extensions values
+        $this->compareUsers();
+
+        //Delete all users
+        \App\WebsiteUser::where('website_id', $this->website->id)->delete();
+
+        foreach ($this->jsonResponse->users as $remoteUser) {
+            $user = new \App\WebsiteUser;
+            $user->id = Uuid::uuid4()->toString();
+            $user->remote_id = $remoteUser->id;
+            $user->login = $remoteUser->user_login;
+            $user->registered = $remoteUser->user_registered;
+            $user->email = $remoteUser->user_email;
+            $user->website_id = $this->website->id;
+
+            $user->save();
+        }
+    }
+
+    /**
      * Compare new and old website's informations
      *
      * @return void
@@ -179,7 +209,7 @@ class Sync {
      */
     private function compareExtensions()
     {
-        if (empty($this->jsonResponse)) {
+        if (empty($this->jsonResponse->extensions)) {
             return false;
         }
 
@@ -196,7 +226,7 @@ class Sync {
                             $alert = [
                                 'context' => $this->context,
                                 'website_name' => $this->website->name,
-                                'message' => $extension->name.'\'s ('.$extension->type.') version has change from '.$extension->version.' to '.$remoteExtension->Version,
+                                'message' => $extension->name.'\'s ('.$extension->type.') version has changed from '.$extension->version.' to '.$remoteExtension->Version,
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
@@ -233,6 +263,86 @@ class Sync {
                     'context' => $this->context,
                     'website_name' => $this->website->name,
                     'message' => $remoteExtension->Name.' ('.$remoteExtension->Type.') version '.$remoteExtension->Version.' has been installed',
+                    'status' => 'warning'
+                ];
+                $this->user->notify(new SyncAlert($alert));
+            }
+        }
+
+    }
+
+    /**
+     * Compare new and old website's users informations
+     *
+     * @return void
+     */
+    private function compareUsers()
+    {
+        if (empty($this->jsonResponse)) {
+            return false;
+        }
+
+        $users = \App\WebsiteUser::where('website_id', $this->website->id)->get();
+        $remoteUsers = $this->jsonResponse->users;
+
+        // Check for version changes
+        if (!empty($users)) {
+            foreach ($users as $j => $user) {
+                foreach ($remoteUsers as $k => $remoteUser) {
+                    if ($user->remote_id == $remoteUser->id) {
+                        // If the email has changed, notify the user
+                        if ($user->email != $remoteUser->user_email) {
+                            $alert = [
+                                'context' => $this->context,
+                                'website_name' => $this->website->name,
+                                'message' => $user->email.'\'s email has changed from '.$user->email.' to '.$remoteUser->user_email,
+                                'status' => 'warning'
+                            ];
+                            $this->user->notify(new SyncAlert($alert));
+                        }
+
+                        // If the login has changed, notify the user
+                        if ($user->login != $remoteUser->user_login) {
+                            $alert = [
+                                'context' => $this->context,
+                                'website_name' => $this->website->name,
+                                'message' => $user->login.'\'s login has changed from '.$user->login.' to '.$remoteUser->user_login,
+                                'status' => 'warning'
+                            ];
+                            $this->user->notify(new SyncAlert($alert));
+                        }
+
+                        // delete this found extension from the array
+                        unset($users[$j]);
+                        unset($remoteUsers[$k]);
+
+                        // as we have found the corresponding extensions, no need to search anymore
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Check if there are some deleted users
+        if (!empty($users)) {
+            foreach ($users as $user) {
+                $alert = [
+                    'context' => $this->context,
+                    'website_name' => $this->website->name,
+                    'message' => 'User '.$user->login.' has been deleted',
+                    'status' => 'warning'
+                ];
+                $this->user->notify(new SyncAlert($alert));
+            }
+        }
+
+        // Check if there are some new users
+        if (!empty($remoteUsers)) {
+            foreach ($remoteUsers as $remoteUser) {
+                $alert = [
+                    'context' => $this->context,
+                    'website_name' => $this->website->name,
+                    'message' => 'User '.$remoteUser->user_login.' has been added',
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));

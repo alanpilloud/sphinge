@@ -13,4 +13,12 @@ class Website extends Model
     {
         return $this->hasMany('App\Extension');
     }
+
+    /**
+     * Get the websites users for the website.
+     */
+    public function website_users()
+    {
+        return $this->hasMany('App\WebsiteUser');
+    }
 }

@@ -46,7 +46,36 @@
                     </tbody>
                 </table>
             @else
-                <p>No websites for the moment.</p>
+                <p>No extensions for the moment.</p>
+            @endif
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Users</div>
+
+        <div class="panel-body">
+            @if (count($users) >= 1)
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Login</th>
+                            <th>Email</th>
+                            <th>Registration date<br/><small>Remote website time</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr>
+                                <td>{{ $user->login }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>{{ $user->registered }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p>No users for the moment.</p>
             @endif
         </div>
     </div>

@@ -55,7 +55,7 @@ class WebsiteController extends Controller
     public function show($id)
     {
         $website = Website::findOrFail($id);
-        return view('website.detail', ['website' => $website, 'extensions' => $website->extensions]);
+        return view('website.detail', ['website' => $website, 'extensions' => $website->extensions, 'users' => $website->website_users]);
     }
 
     /**
@@ -113,6 +113,7 @@ class WebsiteController extends Controller
         $sync->fetch();
         $sync->updateWebsite();
         $sync->updateExtensions();
+        $sync->updateUsers();
 
         // get the notifications
         // @todo the LIKE needs to be replaced when mysql 5.7 will be more globally supported
@@ -121,7 +122,7 @@ class WebsiteController extends Controller
                     ['notifiable_id', Auth::user()->id],
                     ['data', 'like', '%"context":"manual"%']
                 ]);
-                
+
         $notifications = $notificationsQuery->get();
         $notificationsQuery->delete();
 
