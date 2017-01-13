@@ -25,7 +25,7 @@ return [
     |
     */
 
-    'env' => env('APP_ENV', 'production'),
+    'env' => env('APP_ENV', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -166,8 +166,7 @@ return [
         /*
          * Package Service Providers...
          */
-
-        //
+        RachidLaasri\LaravelInstaller\Providers\LaravelInstallerServiceProvider::class,
 
         /*
          * Application Service Providers...
