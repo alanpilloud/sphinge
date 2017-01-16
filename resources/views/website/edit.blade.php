@@ -18,8 +18,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="secret_key">Secret Key</label>
-                    <input type="text" value="{{ $website->secret_key }}" class="form-control" name="secret_key" id="secret_key">
+                    <label>Secret Key</label>
+                    <input type="text" value="{{ $website->secret_key }}" class="form-control" readonly>
                 </div>
 
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">

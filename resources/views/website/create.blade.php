@@ -17,11 +17,6 @@
                     <input type="text" class="form-control" name="url" id="url">
                 </div>
 
-                <div class="form-group">
-                    <label for="secret_key">Secret Key</label>
-                    <input type="text" class="form-control" name="secret_key" id="secret_key">
-                </div>
-
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-success">Save</button>
             </form>

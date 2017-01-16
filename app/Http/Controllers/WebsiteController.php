@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Website;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
 class WebsiteController extends Controller
 {
@@ -40,7 +41,7 @@ class WebsiteController extends Controller
         $website = new Website();
         $website->name = $request->name;
         $website->url = $request->url;
-        $website->secret_key = $request->secret_key;
+        $website->secret_key = Uuid::uuid4()->toString();
         $website->user_id = Auth::id();
         $website->save();
         return redirect()->action('WebsiteController@index');
@@ -82,7 +83,6 @@ class WebsiteController extends Controller
         $website = Website::findOrFail($id);
         $website->name = $request->name;
         $website->url = $request->url;
-        $website->secret_key = $request->secret_key;
         $website->save();
         return redirect()->action('WebsiteController@index');
     }
