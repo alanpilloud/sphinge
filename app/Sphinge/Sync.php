@@ -32,6 +32,13 @@ class Sync {
     private $client;
 
     /**
+     * GuzzleHttp Response for the report request
+     *
+     * @var Response
+     */
+    private $reportResponse;
+
+    /**
      * Json Object from the webservice
      *
      * @var stdClass Object
@@ -97,13 +104,12 @@ class Sync {
         /**
          * Now, run the synchronization
          */
-        $response = $this->fetch('/sphinge/report.php');
-        $this->jsonResponse = json_decode($response->getBody());
+        $this->reportResponse = $this->fetch('/sphinge/report.php');
+        $this->jsonResponse = json_decode($this->reportResponse->getBody());
         $this->homepageResponse = $this->fetch('/');
         $this->updateWebsite();
         $this->updateExtensions();
         $this->updateUsers();
-        $this->compareHomepageLength();
     }
 
     /**
@@ -116,12 +122,26 @@ class Sync {
     public function fetch($path)
     {
         try {
-            return $this->client->request('GET', $path);
+            $response = $this->client->request('GET', $path);
+
+            if (empty($response->getBody()->getContents())) {
+                throw new \Exception("Response body is empty", 1);
+            }
+
+            return $response;
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach '.$website->url.$path,
+                'message' => 'Can\'t reach '.$this->website->url.$path,
+                'status' => 'danger'
+            ];
+            $this->user->notify(new SyncAlert($alert));
+        }  catch(\Exception $e) {
+            $alert = [
+                'context' => $this->context,
+                'website_name' => $this->website->name,
+                'message' => 'Can\'t reach '.$this->website->url.$path.'. Please, check that the secret key has been correctly provided.',
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
@@ -141,6 +161,8 @@ class Sync {
 
         // compare new and old values
         $this->compareWebsite();
+        // compare homepage size
+        $this->compareHomepageLength();
 
         // Assign new values to fields
         foreach ($this->websiteFields as $field) {
