@@ -125,6 +125,14 @@ class WebsiteController extends Controller
         // get notifications from the array to send them to the blade template
         $notificationsArray = array_map('json_decode', array_pluck($notifications, 'data'));
 
+        // if there are no notifications, just send a success message
+        if (empty($notificationsArray)) {
+            $success = new \stdClass();
+            $success->message = 'Synchronization done, no warning.';
+            $success->status = 'success';
+            $notificationsArray[] = $success;
+        }
+
         return redirect()->action('WebsiteController@show', ['id' => $id])->with('notifications', $notificationsArray);
     }
 
