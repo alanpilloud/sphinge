@@ -24,3 +24,13 @@ You may gracefully restart all of the workers by issuing the queue:restart comma
 ```
 $ php artisan queue:restart
 ```
+
+### Shared host configuration
+
+If you are running Sphinge on a shared host, you can run a scheduled task on this url :
+
+```
+http://localhost:8000/api/websites/sync
+```
+
+As a measure of security, this url can't be run on a webbrowser.

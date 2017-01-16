@@ -100,7 +100,7 @@ class WebsiteController extends Controller
     }
 
     /**
-     * Synchronize the website with it's remote content
+     * Synchronize the website with its remote content
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -126,6 +126,23 @@ class WebsiteController extends Controller
         $notificationsArray = array_map('json_decode', array_pluck($notifications, 'data'));
 
         return redirect()->action('WebsiteController@show', ['id' => $id])->with('notifications', $notificationsArray);
+    }
+
+    /**
+     * Synchronize all websites with their remote contents
+     *
+     * @return void
+     */
+    public function syncAll() {
+        // Ensure that this route isn't callable by a webbrowser
+        if (php_sapi_name() != 'cli') {
+            exit;
+        }
+
+        // Run Sync on all websites
+        $exitCode = \Artisan::call('websites:enqueue');
+
+        exit;
     }
 
     /**
