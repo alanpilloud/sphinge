@@ -127,8 +127,6 @@ class Sync {
             if (empty($response->getBody()->getContents())) {
                 throw new \Exception("Response body is empty", 1);
             }
-
-            return $response;
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             $alert = [
                 'context' => $this->context,
@@ -146,6 +144,8 @@ class Sync {
             ];
             $this->user->notify(new SyncAlert($alert));
         }
+
+        return $response;
     }
 
     /**
