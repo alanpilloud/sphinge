@@ -39,6 +39,13 @@ class Sync {
     private $jsonResponse;
 
     /**
+     * GuzzleHttp Response for the homepage request
+     *
+     * @var Response
+     */
+    private $homepageResponse;
+
+    /**
      * Fields to be fetched and compared
      *
      * @var array
@@ -90,27 +97,31 @@ class Sync {
         /**
          * Now, run the synchronization
          */
-        $this->fetch();
+        $response = $this->fetch('/sphinge/report.php');
+        $this->jsonResponse = json_decode($response->getBody());
+        $this->homepageResponse = $this->fetch('/');
         $this->updateWebsite();
         $this->updateExtensions();
         $this->updateUsers();
+        $this->compareHomepageLength();
     }
 
     /**
      * Get the remote data
      *
-     * @return void
+     * @var string  url path without domain name, begins with slash
+     *
+     * @return GuzzleHttp Response
      */
-    public function fetch()
+    public function fetch($path)
     {
         try {
-            $response = $this->client->request('GET', '/sphinge/report.php');
-            $this->jsonResponse = json_decode($response->getBody());
+            return $this->client->request('GET', $path);
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach remote website.',
+                'message' => 'Can\'t reach '.$website->url.$path,
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
@@ -135,6 +146,9 @@ class Sync {
         foreach ($this->websiteFields as $field) {
             $this->website->{$field} = $this->jsonResponse->system->{$field};
         }
+
+        // assign new homepage length
+        $this->website->homepage_length = strlen($this->homepageResponse->getBody()) or 0;
 
         $this->website->save();
     }
@@ -220,7 +234,27 @@ class Sync {
                 $this->user->notify(new SyncAlert($alert));
             }
         }
+    }
 
+    /**
+     * Compare homepage's content length
+     *
+     * @return void
+     */
+    private function compareHomepageLength()
+    {
+        $remote_homepage_length = strlen($this->homepageResponse->getBody()) or 0;
+        $homepage_length_delta = abs($this->website->homepage_length - $remote_homepage_length);
+
+        if ($homepage_length_delta > 50) {
+            $alert = [
+                'context' => $this->context,
+                'website_name' => $this->website->name,
+                'message' => 'Homepage\'s content length has a change of '.$homepage_length_delta.' characters.',
+                'status' => 'warning'
+            ];
+            $this->user->notify(new SyncAlert($alert));
+        }
     }
 
     /**
