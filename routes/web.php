@@ -17,13 +17,15 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index');
-Route::get('/websites', 'WebsiteController@index');
-Route::get('/websites/create', 'WebsiteController@create');
-Route::post('/websites/store', 'WebsiteController@store');
-Route::get('/websites/{id}', 'WebsiteController@show');
-Route::get('/websites/{id}/edit', 'WebsiteController@edit');
-Route::post('/websites/{id}/update', 'WebsiteController@update');
-Route::get('/websites/{id}/destroy', 'WebsiteController@destroy');
-Route::get('/websites/{id}/sync', 'WebsiteController@sync');
-Route::get('/websites/{id}/audit', 'WebsiteController@audit');
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/home', 'HomeController@index');
+    Route::get('/websites', 'WebsiteController@index');
+    Route::get('/websites/create', 'WebsiteController@create');
+    Route::post('/websites/store', 'WebsiteController@store');
+    Route::get('/websites/{id}', 'WebsiteController@show');
+    Route::get('/websites/{id}/edit', 'WebsiteController@edit');
+    Route::post('/websites/{id}/update', 'WebsiteController@update');
+    Route::get('/websites/{id}/destroy', 'WebsiteController@destroy');
+    Route::get('/websites/{id}/sync', 'WebsiteController@sync');
+    Route::get('/websites/{id}/audit', 'WebsiteController@audit');
+});
