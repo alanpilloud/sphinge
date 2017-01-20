@@ -91,6 +91,7 @@
                 </div>
             </div>
         </div>
+        <div class="text-center small">You are using Sphinge version {{ Config('app.app_version') }}</div>
     </div>
 
     <!-- Scripts -->
