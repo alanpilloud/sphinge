@@ -91,7 +91,7 @@ class Sync {
         $this->extensions = $extensions;
         $this->client = new Client([
             'base_uri' => $website->url,
-            'timeout'  => 5.0,
+            'timeout'  => 30.0,
             'headers' => [
                 'MONITORING-AGENT' => 'sphinge-monitoring'
             ],
