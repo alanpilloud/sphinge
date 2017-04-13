@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Website;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid\Uuid;
 
 class WebsiteController extends Controller
@@ -17,7 +18,12 @@ class WebsiteController extends Controller
      */
     public function index()
     {
-        return view('website.index', ['websites' => Auth::user()->websites]);
+        $current_wp_version = Cache::get('current_wp_version', '0');
+
+        return view('website.index', [
+            'current_wp_version' => $current_wp_version,
+            'websites' => Auth::user()->websites
+        ]);
     }
 
     /**

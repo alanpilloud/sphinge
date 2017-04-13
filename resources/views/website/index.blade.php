@@ -11,12 +11,14 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th colspan="2">CMS Version</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($websites as $k => $website)
                             <tr>
                                 <td><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a></td>
+                                <td>WordPress <span class="label label-{{ ($website->wp_version == $current_wp_version) ? 'success' : 'danger' }}">{{ $website->wp_version }}</span></td>
                                 <td>
                                     <div class="dropdown pull-right">
                                         <button class="btn btn-xs btn-default dropdown-toggle" type="button" id="dropdownMenu{{ $k }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">

@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\EnqueueWebsites::class
+        Commands\EnqueueWebsites::class,
+        Commands\CmsversionWordpress::class,
     ];
 
     /**
@@ -25,6 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('websites:enqueue')->everyMinute();
+        $schedule->command('cmsversion:wordpress')->daily();
     }
 
     /**
