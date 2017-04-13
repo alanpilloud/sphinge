@@ -268,7 +268,7 @@ class Sync {
         $remote_homepage_length = strlen($this->homepageResponse->getBody()) or 0;
         $homepage_length_delta = abs($this->website->homepage_length - $remote_homepage_length);
 
-        if ($homepage_length_delta > 50) {
+        if ($homepage_length_delta > 300) {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
