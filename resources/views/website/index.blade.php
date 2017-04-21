@@ -28,6 +28,10 @@
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenu{{ $k }}">
                                             <li><a href="{{ url('/websites/'. $website->id.'/edit') }}">Edit</a></li>
                                             <li><a href="{{ url('/websites/'. $website->id.'/sync') }}">Sync</a></li>
+                                            <li><a href="{{ url('/websites/'. $website->id.'/audit') }}">Audit</a></li>
+                                            @if ($website->hasExtension('Sphinge Interceptor'))
+                                                <li><a href="{{ url('/websites/'. $website->id.'/logs') }}">Logs</a></li>
+                                            @endif
                                             <li role="separator" class="divider"></li>
                                             <li><a style="color:#a94442" href="{{ url('/websites/'. $website->id.'/destroy') }}">Trash</a></li>
                                         </ul>

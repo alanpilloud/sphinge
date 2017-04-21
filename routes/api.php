@@ -18,3 +18,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 Route::get('/websites/sync', 'WebsiteController@syncAll');
+Route::post('/intercept', 'InterceptorLogController@store');

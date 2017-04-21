@@ -80,7 +80,7 @@
         </nav>
         <div class="container">
             <div class="row">
-                <div class="col-md-8 col-md-offset-2">
+                <div class="col-lg-8 col-lg-offset-2">
                     @if (session('notifications'))
                         @foreach (session('notifications') as $notification)
                             <div class="alert alert-{{ $notification->status }}">{{ $notification->message }}</div>
