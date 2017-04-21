@@ -90,7 +90,7 @@ class Sync {
 
         $this->extensions = $extensions;
         $this->client = new Client([
-            'base_uri' => $website->url,
+            'base_uri' => rtrim($website->url, '/').'/', // make sure that the url ends with a /
             'timeout'  => 30.0,
             'headers' => [
                 'MONITORING-AGENT' => 'sphinge-monitoring'
@@ -104,7 +104,7 @@ class Sync {
         /**
          * Now, run the synchronization
          */
-        $this->reportResponse = $this->fetch('/sphinge/report.php');
+        $this->reportResponse = $this->fetch('sphinge/report.php');
         if ($this->reportResponse !== false) {
             $this->jsonResponse = json_decode($this->reportResponse->getBody());
             $this->homepageResponse = $this->fetch('/');
