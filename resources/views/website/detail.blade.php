@@ -1,8 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
+    <h1 class="page-header">{{ $website->name }} <small>Details</small>
+        <div class="pull-right">
+            <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/sync') }}">Synchronize</a>
+            <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/edit') }}">Edit</a>
+            <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/audit') }}">Audit</a>
+            @if ($website->hasExtension('Sphinge Interceptor'))
+                <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/logs') }}">Logs</a>
+            @endif
+        </div>
+    </h1>
     <div class="panel panel-default">
-        <div class="panel-heading">{{$website->name}}<a class="btn btn-xs btn-primary pull-right" href="{{ url('/websites/'. $website->id.'/sync') }}">Synchronize</a></div>
+        <div class="panel-heading">
+            Main informations
+        </div>
 
         <div class="panel-body">
             <table class="table">

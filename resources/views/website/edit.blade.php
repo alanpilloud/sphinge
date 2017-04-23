@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="panel panel-default">
-        <div class="panel-heading">{{ $website->name }}</div>
+    <h1 class="page-header"><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a> <small>Edit</small></h1>
 
+    <div class="panel panel-default">
         <div class="panel-body">
             <form method="POST" action="/websites/{{ $website->id }}/update" accept-charset="UTF-8">
 

@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+    <h1 class="page-header"><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a> <small>Audit</small>
+        <div class="pull-right">
+            <a class="btn btn-xs btn-primary pull-right" href="{{ url('/websites/'. $website->id.'/audit') }}">Run audit</a>
+        </div>
+    </h1>
     <div class="panel panel-default">
-        <div class="panel-heading">{{$website->name}}<a class="btn btn-xs btn-primary pull-right" href="{{ url('/websites/'. $website->id.'/audit') }}">Run audit</a></div>
+        <div class="panel-heading">Security Rules</div>
 
         <div class="panel-body">
             <div class="list-group">

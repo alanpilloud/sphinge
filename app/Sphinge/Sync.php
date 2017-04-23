@@ -90,7 +90,7 @@ class Sync {
 
         $this->extensions = $extensions;
         $this->client = new Client([
-            'base_uri' => $website->url,
+            'base_uri' => rtrim($website->url, '/').'/', // make sure that the url ends with a /
             'timeout'  => 30.0,
             'headers' => [
                 'MONITORING-AGENT' => 'sphinge-monitoring'
@@ -104,12 +104,14 @@ class Sync {
         /**
          * Now, run the synchronization
          */
-        $this->reportResponse = $this->fetch('/sphinge/report.php');
-        $this->jsonResponse = json_decode($this->reportResponse->getBody());
-        $this->homepageResponse = $this->fetch('/');
-        $this->updateWebsite();
-        $this->updateExtensions();
-        $this->updateUsers();
+        $this->reportResponse = $this->fetch('sphinge/report.php');
+        if ($this->reportResponse !== false) {
+            $this->jsonResponse = json_decode($this->reportResponse->getBody());
+            $this->homepageResponse = $this->fetch('/');
+            $this->updateWebsite();
+            $this->updateExtensions();
+            $this->updateUsers();
+        }
     }
 
     /**
@@ -127,6 +129,8 @@ class Sync {
             if (empty($response->getBody()->getContents())) {
                 throw new \Exception("Response body is empty", 1);
             }
+
+            return $response;
         } catch(\GuzzleHttp\Exception\ClientException $e) {
             $alert = [
                 'context' => $this->context,
@@ -135,6 +139,8 @@ class Sync {
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
+            
+            return false;
         }  catch(\Exception $e) {
             $alert = [
                 'context' => $this->context,
@@ -143,9 +149,9 @@ class Sync {
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
-        }
 
-        return $response;
+            return false;
+        }
     }
 
     /**

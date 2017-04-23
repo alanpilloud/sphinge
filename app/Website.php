@@ -21,4 +21,20 @@ class Website extends Model
     {
         return $this->hasMany('App\WebsiteUser');
     }
+
+    /**
+     * Get the interceptor logs for the website.
+     */
+    public function interceptor_logs()
+    {
+        return $this->hasMany('App\InterceptorLog');
+    }
+
+    /**
+     * Check if the website has an extension
+     */
+    public function hasExtension($extension_name)
+    {
+        return in_array($extension_name, $this->extensions->pluck('name')->all());
+    }
 }
