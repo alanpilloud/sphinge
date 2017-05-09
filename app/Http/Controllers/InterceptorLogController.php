@@ -108,6 +108,13 @@ class InterceptorLogController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $log = InterceptorLog::findOrFail($id);
+        InterceptorLog::destroy($id);
+
+        $notification = new \stdClass();
+        $notification->message = 'Deleted succesfully';
+        $notification->status = 'success';
+
+        return redirect()->action('WebsiteInterceptorLogsController@index', ['id' => $log->website_id])->with('notifications', [$notification]);
     }
 }

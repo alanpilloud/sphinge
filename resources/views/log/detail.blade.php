@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="page-header"><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a> <small>Log detail</small></h1>
+    <h1 class="page-header"><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a> <small>Log detail</small>
+        <div class="pull-right">
+            <a class="btn btn-xs btn-primary pull-right" href="{{ url('/log/'. $log->id.'/destroy') }}">Delete this record</a>
+        </div>
+    </h1>
 
     <div class="panel panel-default">
         <div class="panel-body">

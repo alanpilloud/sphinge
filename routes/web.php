@@ -26,4 +26,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/websites/{id}/logs', 'WebsiteInterceptorLogsController@index');
 
     Route::get('/log/{id}', 'InterceptorLogController@show');
+    Route::get('/log/{id}/destroy', 'InterceptorLogController@destroy');
 });
