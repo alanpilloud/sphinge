@@ -102,7 +102,12 @@ class WebsiteController extends Controller
     public function destroy($id)
     {
         Website::destroy($id);
-        return redirect()->action('WebsiteController@index')->with('notifications', [['message' => 'Deleted succesfully', 'status' => 'success']]);
+
+        $notification = new \stdClass();
+        $notification->message = 'Deleted succesfully';
+        $notification->status = 'success';
+
+        return redirect()->action('WebsiteController@index')->with('notifications', [$notification]);
     }
 
     /**
