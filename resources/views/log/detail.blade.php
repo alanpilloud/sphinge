@@ -18,6 +18,8 @@
                 <dd>{{ $log->file }}</dd>
                 <dt>Line</dt>
                 <dd>{{ $log->line }}</dd>
+                <dt>URL</dt>
+                <dd>{{ $log->url }}</dd>
                 <dt>Occurences</dt>
                 <dd>{{ $log->occurences }}</dd>
                 <dt>Last occurence</dt>

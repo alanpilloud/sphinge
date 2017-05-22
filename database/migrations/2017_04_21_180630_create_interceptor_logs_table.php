@@ -21,6 +21,7 @@ class CreateInterceptorLogsTable extends Migration
             $table->text('message');
             $table->string('file');
             $table->integer('line');
+            $table->string('url')->comment('The url on which the error happened');
             $table->integer('occurences')->default(1);
             $table->timestamp('last_occurence');
             $table->integer('website_id')->unsigned();
