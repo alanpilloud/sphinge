@@ -3,6 +3,7 @@
 /storage/*.key
 /storage/installed
 /vendor
+/dist
 /.idea
 Homestead.json
 Homestead.yaml

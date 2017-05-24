@@ -53,6 +53,7 @@ class InterceptorLogController extends Controller
             $log->message = $message['message'];
             $log->file = $message['file'];
             $log->line = $message['line'];
+            $log->url = $message['url'];
             $log->website_id = $website->id;
             $log->occurences = 1;
         }
