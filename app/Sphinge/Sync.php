@@ -167,8 +167,6 @@ class Sync {
 
         // compare new and old values
         $this->compareWebsite();
-        // compare homepage size
-        $this->compareHomepageLength();
 
         // Assign new values to fields
         foreach ($this->websiteFields as $field) {
@@ -261,27 +259,6 @@ class Sync {
                 ];
                 $this->user->notify(new SyncAlert($alert));
             }
-        }
-    }
-
-    /**
-     * Compare homepage's content length
-     *
-     * @return void
-     */
-    private function compareHomepageLength()
-    {
-        $remote_homepage_length = strlen($this->homepageResponse->getBody()) or 0;
-        $homepage_length_delta = abs($this->website->homepage_length - $remote_homepage_length);
-
-        if ($homepage_length_delta > 300) {
-            $alert = [
-                'context' => $this->context,
-                'website_name' => $this->website->name,
-                'message' => 'Homepage\'s content length has a change of '.$homepage_length_delta.' characters.',
-                'status' => 'warning'
-            ];
-            $this->user->notify(new SyncAlert($alert));
         }
     }
 
