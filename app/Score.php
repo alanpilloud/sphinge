@@ -21,7 +21,7 @@ class Score extends Model
     public static function up($score_name, $website_id, $increment_by = 1) {
         // bail early if one of the parameters is empty
         // that's very useful because $increment_by might be set to 0 sometimes
-        if (empty($score_name) || empty($website_id) || empty($increment_by) {
+        if (empty($score_name) || empty($website_id) || empty($increment_by)) {
             return false;
         }
 
