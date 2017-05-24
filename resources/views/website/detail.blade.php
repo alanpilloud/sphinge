@@ -6,6 +6,7 @@
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/sync') }}">Synchronize</a>
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/edit') }}">Edit</a>
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/audit') }}">Audit</a>
+            <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/scores') }}">Scores</a>
             @if ($website->hasExtension('Sphinge Interceptor'))
                 <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/logs') }}">Logs</a>
             @endif

@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use App\Notifications\SyncAlert;
 use Illuminate\Support\Facades\Auth;
 use \App\User;
+use \App\Score;
 use Ramsey\Uuid\Uuid;
 
 class Sync {
@@ -173,9 +174,6 @@ class Sync {
             $this->website->{$field} = $this->jsonResponse->system->{$field};
         }
 
-        // assign new homepage length
-        $this->website->homepage_length = strlen($this->homepageResponse->getBody()) or 0;
-
         $this->website->save();
     }
 
@@ -248,6 +246,7 @@ class Sync {
             return false;
         }
 
+
         foreach ($this->websiteFields as $field) {
             // if the value has changed, notify the user
             if ($this->website->{$field} != $this->jsonResponse->system->{$field}) {
@@ -258,6 +257,9 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                // when a value changes, update its related score
+                Score::up($field, $this->website->id);
             }
         }
     }
@@ -278,6 +280,7 @@ class Sync {
 
         // Check for version changes
         if (!empty($extensions)) {
+            $scoreCounter = 0;
             foreach ($extensions as $j => $extension) {
                 foreach ($remoteExtensions as $k => $remoteExtension) {
                     if ($extension->name == $remoteExtension->Name) {
@@ -290,6 +293,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // delete this found extension from the array
@@ -301,10 +306,14 @@ class Sync {
                     }
                 }
             }
+
+            // update the number of extensions updated
+            Score::up('extensions_updated', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some deleted extensions
         if (!empty($extensions)) {
+            $scoreCounter = 0;
             foreach ($extensions as $extension) {
                 $alert = [
                     'context' => $this->context,
@@ -314,10 +323,14 @@ class Sync {
                 ];
                 $this->user->notify(new SyncAlert($alert));
             }
+
+            // update the number of extensions that have been deleted
+            Score::up('extensions_deleted', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some new extensions
         if (!empty($remoteExtensions)) {
+            $scoreCounter = 0;
             foreach ($remoteExtensions as $remoteExtension) {
                 $alert = [
                     'context' => $this->context,
@@ -327,6 +340,9 @@ class Sync {
                 ];
                 $this->user->notify(new SyncAlert($alert));
             }
+
+            // update the number of extensions that have been installed
+            Score::up('extensions_installed', $this->website->id, $scoreCounter);
         }
 
     }
@@ -347,6 +363,8 @@ class Sync {
 
         // Check for version changes
         if (!empty($users)) {
+            $scoreCounter = 0;
+
             foreach ($users as $j => $user) {
                 foreach ($remoteUsers as $k => $remoteUser) {
                     if ($user->remote_id == $remoteUser->id) {
@@ -359,6 +377,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // If the login has changed, notify the user
@@ -370,6 +390,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // delete this found extension from the array
@@ -381,10 +403,15 @@ class Sync {
                     }
                 }
             }
+
+            // update the number of users that have been updated
+            Score::up('users_updated', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some deleted users
         if (!empty($users)) {
+
+            $scoreCounter = 0;
             foreach ($users as $user) {
                 $alert = [
                     'context' => $this->context,
@@ -393,11 +420,18 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                $scoreCounter++;
             }
+
+            // update the number of users that have been deleted
+            Score::up('users_deleted', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some new users
         if (!empty($remoteUsers)) {
+
+            $scoreCounter = 0;
             foreach ($remoteUsers as $remoteUser) {
                 $alert = [
                     'context' => $this->context,
@@ -406,7 +440,12 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                $scoreCounter++;
             }
+
+            // update the number of users that have been created
+            Score::up('users_created', $this->website->id, $scoreCounter);
         }
 
     }

@@ -23,6 +23,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/websites/{id}/destroy', 'WebsiteController@destroy');
     Route::get('/websites/{id}/sync', 'WebsiteController@sync');
     Route::get('/websites/{id}/audit', 'WebsiteController@audit');
+    Route::get('/websites/{id}/scores', 'WebsiteScoresController@index');
     Route::get('/websites/{id}/logs', 'WebsiteInterceptorLogsController@index');
     Route::get('/websites/{id}/logs/destroy-all', 'WebsiteInterceptorLogsController@destroyAll');
 

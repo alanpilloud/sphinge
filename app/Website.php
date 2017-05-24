@@ -31,6 +31,14 @@ class Website extends Model
     }
 
     /**
+     * Get the scores for the website.
+     */
+    public function scores()
+    {
+        return $this->hasMany('App\Score');
+    }
+
+    /**
      * Check if the website has an extension
      */
     public function hasExtension($extension_name)
