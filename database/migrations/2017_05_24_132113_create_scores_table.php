@@ -14,13 +14,12 @@ class CreateScoresTable extends Migration
     public function up()
     {
         Schema::create('scores', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->increments('id');
             $table->string('score_name');
             $table->integer('score_value_since_day1')->default(1)->comment('this value should never be reseted');
             $table->integer('score_value')->default(1)->comment('this value can be reseted, after a report for instance');
             $table->integer('website_id')->unsigned();
             $table->foreign('website_id')->references('id')->on('websites')->onDelete('cascade');
-            $table->timestamps();
         });
     }
 

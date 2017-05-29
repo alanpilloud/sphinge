@@ -3,20 +3,23 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Ramsey\Uuid\Uuid;
 
 class Score extends Model
 {
-    protected $fillable = ['id', 'score_name', 'website_id'];
+    // allow firstOrCreate to fill these fields
+    protected $fillable = ['score_name', 'website_id'];
+
+    // dont use timestamps
+    public $timestamps = false;
 
     /**
      * Increments the score values
      *
      * @param $score_name the score identifier name
      * @param $website_id the website unique id
-     * @param $increment_by the website unique id
+     * @param $increment_by allows to set the incrementation of the score
      *
-     * @return false if an error occured
+     * @return void or false if an error occured
      */
     public static function up($score_name, $website_id, $increment_by = 1) {
         // bail early if one of the parameters is empty
@@ -30,10 +33,6 @@ class Score extends Model
             [
                 'score_name' => $score_name,
                 'website_id' => $website_id
-            ],
-            // create with these fields
-            [
-                'id' => Uuid::uuid4()->toString()
             ]
         );
 
