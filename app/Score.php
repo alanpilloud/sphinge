@@ -28,7 +28,7 @@ class Score extends Model
             return false;
         }
 
-        $score = self::firstOrCreate(
+        $score = self::firstOrNew(
             // querying for these fields
             [
                 'score_name' => $score_name,

@@ -26,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Sphinge Version</td><td>{{ $website->sphinge_version }}</td></tr>
+                    <tr><td>Sphinge Version</td><td>{{ $sphinge_version }}</td></tr>
                     <tr><td>WordPress Version</td><td>{{ $website->wp_version }}</td></tr>
                     <tr><td>PHP Version</td><td>{{ $website->php_version }}</td></tr>
                     <tr><td>MySQL Version</td><td>{{ $website->mysql_version }}</td></tr>

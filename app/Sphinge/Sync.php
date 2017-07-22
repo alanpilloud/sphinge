@@ -59,11 +59,17 @@ class Sync {
      * @var array
      */
     private $websiteFields = [
-        'sphinge_version',
         'wp_version',
         'php_version',
         'mysql_version',
     ];
+
+    /**
+     * Guzzle client defaults values
+     *
+     * @var array
+     */
+    private $client_defaults = [];
 
     /**
      * Describes the context in which the Sync has been initiated
@@ -90,25 +96,24 @@ class Sync {
         }
 
         $this->extensions = $extensions;
-        $this->client = new Client([
+
+        $this->client_defaults = [
             'base_uri' => rtrim($website->url, '/').'/', // make sure that the url ends with a /
             'timeout'  => 30.0,
             'headers' => [
-                'MONITORING-AGENT' => 'sphinge-monitoring'
+                'MONITORING-AGENT' => 'sphinge-monitoring',
+                'SPHINGE-KEY' => $this->website->secret_key
             ],
-            'query' => [
-                'key' => $this->website->secret_key
-            ]
-        ]);
+        ];
 
 
         /**
          * Now, run the synchronization
          */
-        $this->reportResponse = $this->fetch('sphinge/report.php');
+        $this->reportResponse = $this->fetch('get_report');
         if ($this->reportResponse !== false) {
             $this->jsonResponse = json_decode($this->reportResponse->getBody());
-            $this->homepageResponse = $this->fetch('/');
+            $this->homepageResponse = $this->fetch('get_homepage');
             $this->updateWebsite();
             $this->updateExtensions();
             $this->updateUsers();
@@ -118,14 +123,24 @@ class Sync {
     /**
      * Get the remote data
      *
-     * @var string  url path without domain name, begins with slash
+     * @var string  action to execute on the remote website
      *
      * @return GuzzleHttp Response
      */
-    public function fetch($path)
+    public function fetch($action)
     {
+        if (empty($action)) {
+            return false;
+        }
+        
+        // clone the default client configuration and assign the action in headers
+        $request_params = $this->client_defaults;
+        $request_params['headers']['SPHINGE-ACTION'] = $action;
+
+        $this->client = new Client($request_params);
+
         try {
-            $response = $this->client->request('GET', $path);
+            $response = $this->client->request('GET');
 
             if (empty($response->getBody()->getContents())) {
                 throw new \Exception("Response body is empty", 1);
@@ -136,7 +151,7 @@ class Sync {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach '.$this->website->url.$path,
+                'message' => 'Can\'t reach '.$this->website->url,
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
@@ -146,7 +161,7 @@ class Sync {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach '.$this->website->url.$path.'. Please, check that the secret key has been correctly provided.',
+                'message' => 'Can\'t reach '.$this->website->url.'. Please, check that the secret key has been correctly provided.'.$e->getMessage(),
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
