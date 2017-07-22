@@ -6,6 +6,7 @@
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/sync') }}">Synchronize</a>
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/edit') }}">Edit</a>
             <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/audit') }}">Audit</a>
+            <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/scores') }}">Scores</a>
             @if ($website->hasExtension('Sphinge Interceptor'))
                 <a class="btn btn-xs btn-primary" href="{{ url('/websites/'. $website->id.'/logs') }}">Logs</a>
             @endif
@@ -25,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Sphinge Version</td><td>{{ $website->sphinge_version }}</td></tr>
+                    <tr><td>Sphinge Version</td><td>{{ $sphinge_version }}</td></tr>
                     <tr><td>WordPress Version</td><td>{{ $website->wp_version }}</td></tr>
                     <tr><td>PHP Version</td><td>{{ $website->php_version }}</td></tr>
                     <tr><td>MySQL Version</td><td>{{ $website->mysql_version }}</td></tr>

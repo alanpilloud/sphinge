@@ -23,7 +23,6 @@ class CreateWebsitesTable extends Migration
             $table->string('wp_version')->nullable();
             $table->string('php_version')->nullable();
             $table->string('mysql_version')->nullable();
-            $table->string('homepage_length')->nullable();
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

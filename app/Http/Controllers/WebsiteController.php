@@ -62,7 +62,15 @@ class WebsiteController extends Controller
     public function show($id)
     {
         $website = Website::findOrFail($id);
-        return view('website.detail', ['website' => $website, 'extensions' => $website->extensions, 'users' => $website->website_users]);
+        $sphinge_extension = array_first($website->extensions, function($value, $key) {
+            return $value->name == 'Sphinge';
+        });
+        return view('website.detail', [
+            'website' => $website,
+            'sphinge_version' => $sphinge_extension['version'],
+            'extensions' => $website->extensions,
+            'users' => $website->website_users
+        ]);
     }
 
     /**

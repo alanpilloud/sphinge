@@ -29,6 +29,7 @@
                                             <li><a href="{{ url('/websites/'. $website->id.'/edit') }}">Edit</a></li>
                                             <li><a href="{{ url('/websites/'. $website->id.'/sync') }}">Sync</a></li>
                                             <li><a href="{{ url('/websites/'. $website->id.'/audit') }}">Audit</a></li>
+                                            <li><a href="{{ url('/websites/'. $website->id.'/scores') }}">Scores</a></li>
                                             @if ($website->hasExtension('Sphinge Interceptor'))
                                                 <li><a href="{{ url('/websites/'. $website->id.'/logs') }}">Logs</a></li>
                                             @endif

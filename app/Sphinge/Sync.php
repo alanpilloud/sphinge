@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use App\Notifications\SyncAlert;
 use Illuminate\Support\Facades\Auth;
 use \App\User;
+use \App\Score;
 use Ramsey\Uuid\Uuid;
 
 class Sync {
@@ -58,11 +59,17 @@ class Sync {
      * @var array
      */
     private $websiteFields = [
-        'sphinge_version',
         'wp_version',
         'php_version',
         'mysql_version',
     ];
+
+    /**
+     * Guzzle client defaults values
+     *
+     * @var array
+     */
+    private $client_defaults = [];
 
     /**
      * Describes the context in which the Sync has been initiated
@@ -89,25 +96,24 @@ class Sync {
         }
 
         $this->extensions = $extensions;
-        $this->client = new Client([
+
+        $this->client_defaults = [
             'base_uri' => rtrim($website->url, '/').'/', // make sure that the url ends with a /
             'timeout'  => 30.0,
             'headers' => [
-                'MONITORING-AGENT' => 'sphinge-monitoring'
+                'MONITORING-AGENT' => 'sphinge-monitoring',
+                'SPHINGE-KEY' => $this->website->secret_key
             ],
-            'query' => [
-                'key' => $this->website->secret_key
-            ]
-        ]);
+        ];
 
 
         /**
          * Now, run the synchronization
          */
-        $this->reportResponse = $this->fetch('sphinge/report.php');
+        $this->reportResponse = $this->fetch('get_report');
         if ($this->reportResponse !== false) {
             $this->jsonResponse = json_decode($this->reportResponse->getBody());
-            $this->homepageResponse = $this->fetch('/');
+            $this->homepageResponse = $this->fetch('get_homepage');
             $this->updateWebsite();
             $this->updateExtensions();
             $this->updateUsers();
@@ -117,14 +123,24 @@ class Sync {
     /**
      * Get the remote data
      *
-     * @var string  url path without domain name, begins with slash
+     * @var string  action to execute on the remote website
      *
      * @return GuzzleHttp Response
      */
-    public function fetch($path)
+    public function fetch($action)
     {
+        if (empty($action)) {
+            return false;
+        }
+        
+        // clone the default client configuration and assign the action in headers
+        $request_params = $this->client_defaults;
+        $request_params['headers']['SPHINGE-ACTION'] = $action;
+
+        $this->client = new Client($request_params);
+
         try {
-            $response = $this->client->request('GET', $path);
+            $response = $this->client->request('GET');
 
             if (empty($response->getBody()->getContents())) {
                 throw new \Exception("Response body is empty", 1);
@@ -135,7 +151,7 @@ class Sync {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach '.$this->website->url.$path,
+                'message' => 'Can\'t reach '.$this->website->url,
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
@@ -145,7 +161,7 @@ class Sync {
             $alert = [
                 'context' => $this->context,
                 'website_name' => $this->website->name,
-                'message' => 'Can\'t reach '.$this->website->url.$path.'. Please, check that the secret key has been correctly provided.',
+                'message' => 'Can\'t reach '.$this->website->url.'. Please, check that the secret key has been correctly provided.'.$e->getMessage(),
                 'status' => 'danger'
             ];
             $this->user->notify(new SyncAlert($alert));
@@ -172,9 +188,6 @@ class Sync {
         foreach ($this->websiteFields as $field) {
             $this->website->{$field} = $this->jsonResponse->system->{$field};
         }
-
-        // assign new homepage length
-        $this->website->homepage_length = strlen($this->homepageResponse->getBody()) or 0;
 
         $this->website->save();
     }
@@ -248,6 +261,7 @@ class Sync {
             return false;
         }
 
+
         foreach ($this->websiteFields as $field) {
             // if the value has changed, notify the user
             if ($this->website->{$field} != $this->jsonResponse->system->{$field}) {
@@ -258,6 +272,9 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                // when a value changes, update its related score
+                Score::up($field, $this->website->id);
             }
         }
     }
@@ -278,6 +295,7 @@ class Sync {
 
         // Check for version changes
         if (!empty($extensions)) {
+            $scoreCounter = 0;
             foreach ($extensions as $j => $extension) {
                 foreach ($remoteExtensions as $k => $remoteExtension) {
                     if ($extension->name == $remoteExtension->Name) {
@@ -290,6 +308,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // delete this found extension from the array
@@ -301,10 +321,14 @@ class Sync {
                     }
                 }
             }
+
+            // update the number of extensions updated
+            Score::up('extensions_updated', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some deleted extensions
         if (!empty($extensions)) {
+            $scoreCounter = 0;
             foreach ($extensions as $extension) {
                 $alert = [
                     'context' => $this->context,
@@ -314,10 +338,14 @@ class Sync {
                 ];
                 $this->user->notify(new SyncAlert($alert));
             }
+
+            // update the number of extensions that have been deleted
+            Score::up('extensions_deleted', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some new extensions
         if (!empty($remoteExtensions)) {
+            $scoreCounter = 0;
             foreach ($remoteExtensions as $remoteExtension) {
                 $alert = [
                     'context' => $this->context,
@@ -327,6 +355,9 @@ class Sync {
                 ];
                 $this->user->notify(new SyncAlert($alert));
             }
+
+            // update the number of extensions that have been installed
+            Score::up('extensions_installed', $this->website->id, $scoreCounter);
         }
 
     }
@@ -347,6 +378,8 @@ class Sync {
 
         // Check for version changes
         if (!empty($users)) {
+            $scoreCounter = 0;
+
             foreach ($users as $j => $user) {
                 foreach ($remoteUsers as $k => $remoteUser) {
                     if ($user->remote_id == $remoteUser->id) {
@@ -359,6 +392,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // If the login has changed, notify the user
@@ -370,6 +405,8 @@ class Sync {
                                 'status' => 'warning'
                             ];
                             $this->user->notify(new SyncAlert($alert));
+
+                            $scoreCounter++;
                         }
 
                         // delete this found extension from the array
@@ -381,10 +418,15 @@ class Sync {
                     }
                 }
             }
+
+            // update the number of users that have been updated
+            Score::up('users_updated', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some deleted users
         if (!empty($users)) {
+
+            $scoreCounter = 0;
             foreach ($users as $user) {
                 $alert = [
                     'context' => $this->context,
@@ -393,11 +435,18 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                $scoreCounter++;
             }
+
+            // update the number of users that have been deleted
+            Score::up('users_deleted', $this->website->id, $scoreCounter);
         }
 
         // Check if there are some new users
         if (!empty($remoteUsers)) {
+
+            $scoreCounter = 0;
             foreach ($remoteUsers as $remoteUser) {
                 $alert = [
                     'context' => $this->context,
@@ -406,7 +455,12 @@ class Sync {
                     'status' => 'warning'
                 ];
                 $this->user->notify(new SyncAlert($alert));
+
+                $scoreCounter++;
             }
+
+            // update the number of users that have been created
+            Score::up('users_created', $this->website->id, $scoreCounter);
         }
 
     }
