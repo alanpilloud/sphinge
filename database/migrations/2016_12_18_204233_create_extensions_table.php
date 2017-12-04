@@ -19,6 +19,7 @@ class CreateExtensionsTable extends Migration
             $table->string('name');
             $table->string('type');
             $table->string('version');
+            $table->string('new_version')->nullable();
             $table->integer('website_id')->unsigned();
             $table->foreign('website_id')->references('id')->on('websites')->onDelete('cascade');
             $table->timestamps();

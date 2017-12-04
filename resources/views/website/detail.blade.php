@@ -50,7 +50,12 @@
                             <tr>
                                 <td>{{ $extension->type }}</td>
                                 <td>{{ $extension->name }}</td>
-                                <td>{{ $extension->version }}</td>
+                                <td>
+                                    {{ $extension->version }}
+                                    @if ($extension->new_version !== null)
+                                        <span class="label label-danger">{{ $extension->new_version }}</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
