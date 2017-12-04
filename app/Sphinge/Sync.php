@@ -100,6 +100,7 @@ class Sync {
         $this->client_defaults = [
             'base_uri' => rtrim($website->url, '/').'/', // make sure that the url ends with a /
             'timeout'  => 30.0,
+            'verify' => false,
             'headers' => [
                 'MONITORING-AGENT' => 'sphinge-monitoring',
                 'SPHINGE-KEY' => $this->website->secret_key
@@ -215,6 +216,7 @@ class Sync {
             $extension->name = $remoteExtension->Name;
             $extension->type = $remoteExtension->Type;
             $extension->version = $remoteExtension->Version;
+            $extension->new_version = $remoteExtension->New_version ?? null;
             $extension->website_id = $this->website->id;
             $extension->save();
         }
