@@ -68,7 +68,7 @@ class WebsiteController extends Controller
         return view('website.detail', [
             'website' => $website,
             'sphinge_version' => $sphinge_extension['version'],
-            'extensions' => $website->extensions,
+            'extensions' => $website->extensions()->orderBy('type')->get(),
             'users' => $website->website_users
         ]);
     }
