@@ -17,7 +17,10 @@
                     <tbody>
                         @foreach ($websites as $k => $website)
                             <tr>
-                                <td><a href="{{ url('/websites/'. $website->id) }}">{{ $website->name }}</a></td>
+                                <td>
+                                    <a href="{{ $website->url }}/wp-admin" target="_blank" rel="noreferrer noopener"><i class="fa fa-2x fa-tachometer" aria-hidden="true"></i></a>
+                                    <a href="{{ url('/websites/'. $website->id) }}" style="margin-left: 10px">{{ $website->name }}</a>
+                                </td>
                                 <td>WordPress <span class="label label-{{ ($website->wp_version == $current_wp_version) ? 'success' : 'danger' }}">{{ $website->wp_version }}</span></td>
                                 <td>
                                     <div class="dropdown pull-right">
